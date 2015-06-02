@@ -1,15 +1,16 @@
 package com.smartsoftasia.module.HorrizontalImageListView.adapter;
 
 import android.content.Context;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.TextView;
 
+import com.smartsoftasia.module.HorrizontalImageListView.Model.HorizontalListViewModel;
 import com.smartsoftasia.module.HorrizontalImageListView.R;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -17,11 +18,12 @@ import java.util.List;
  */
 public class ImageAdapter extends BaseAdapter {
 
-    List<Integer> imageResources;
+    List<HorizontalListViewModel> imageResources;
     Context mContext;
     LayoutInflater mInflater;
+    Boolean isCarousel = false;
 
-    public ImageAdapter (List<Integer> items, Context mContext) {
+    public ImageAdapter (List<HorizontalListViewModel> items, Context mContext) {
         this.imageResources = items;
         this.mContext = mContext;
         this.mInflater = (LayoutInflater)mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -54,12 +56,30 @@ public class ImageAdapter extends BaseAdapter {
             holder = (ViewHolder) view.getTag();
         }
 
-        holder.imageView.setImageResource(imageResources.get(i));
+        if(isCarousel) carousel(holder);
+
+        if(imageResources.get(i).getUri()!=null)
+            holder.imageView.downloadImageFromFile(new File(imageResources.get(i).getUri()));
+        else if(imageResources.get(i).getUrl()!=null)
+            holder.imageView.downloadImageFromURL(imageResources.get(i).getUrl());
+
         return view;
     }
 
     public static class ViewHolder {
         public PicassoImageView imageView;
 
+    }
+
+    public void setCarousel(Boolean enable){
+        this.isCarousel = enable;
+    }
+
+    private void carousel(ViewHolder holder){
+        DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
+        int width = metrics.widthPixels;
+        ViewGroup.LayoutParams params = holder.imageView.getLayoutParams();
+        params.width = width;
+        holder.imageView.setLayoutParams(params);
     }
 }
